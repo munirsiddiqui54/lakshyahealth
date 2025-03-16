@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "253609474898",
+    "firebase_url": "https://bytecamp-database-default-rtdb.firebaseio.com",
+    "project_id": "bytecamp-database",
+    "storage_bucket": "bytecamp-database.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253609474898:android:a4619e05ba8a5487b9d88b",
+        "android_client_info": {
+          "package_name": "com.arogya.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnvHDzWa-mkVCzRXnbsNOQK0SrfGRYGfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253609474898:android:9f91aa74dbde5640b9d88b",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnvHDzWa-mkVCzRXnbsNOQK0SrfGRYGfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253609474898:android:e5b93e2506aaed67b9d88b",
+        "android_client_info": {
+          "package_name": "com.example.arogya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnvHDzWa-mkVCzRXnbsNOQK0SrfGRYGfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
