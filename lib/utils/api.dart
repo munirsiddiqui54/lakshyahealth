@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 // Function to fetch chatbot response
-Future<String> fetchResponse(String query) async {
+Future<String> fetchResponse(String query, String hid) async {
   final url = Uri.parse('https://healthbot.pythonanywhere.com/api/chat/');
 
   final response = await http.post(
@@ -11,7 +11,7 @@ Future<String> fetchResponse(String query) async {
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
-      'hid': '00001',
+      'hid': hid,
       'query': query,
     }),
   );
@@ -25,7 +25,7 @@ Future<String> fetchResponse(String query) async {
 }
 
 // Function to fetch hospitals based on location
-Future<List<dynamic>> fetchHospitals(String location) async {
+Future<List<dynamic>> fetchHospitals(String location, String hid) async {
   final url =
       Uri.parse('https://healthbot.pythonanywhere.com/api/get-hospitals/');
 
@@ -35,7 +35,7 @@ Future<List<dynamic>> fetchHospitals(String location) async {
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
-      'hid': '00001',
+      'hid': hid,
       'location': "Sanpada, Navi Mumbai.",
     }),
   );

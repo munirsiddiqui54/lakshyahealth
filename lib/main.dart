@@ -1,24 +1,44 @@
+import 'package:arogya/components/newtable.dart';
 import 'package:arogya/pages/login.dart';
+import 'package:arogya/pages/medical.dart';
 import 'package:flutter/material.dart';
 import 'pages/home_screen.dart'; // Import HomeScreen
 import 'pages/disease_screen.dart'; // Import DiseaseScreen
 import 'pages/pollution_screen.dart'; // Import PollutionScreen
-import 'pages/mental_health_screen.dart'; // Import MentalH
+import 'pages/mental_health_screen.dart'; // Import Mental
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_database/firebase_database.dart'; // Add this import
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Handle background notifications
   print("Handling background message: ${message.messageId}");
 }
 
-Future<void> getDeviceToken() async {
-  String? token = await FirebaseMessaging.instance.getToken();
-  print("FCM Token: $token");
+// Updated to store token in Realtime Database
+Future<void> saveTokenToDatabase(String token, String hid) async {
+  try {
+    final DatabaseReference database = FirebaseDatabase.instance.ref();
+    await database.child('user').child(hid).child('fcm').set(token);
+    print("FCM Token saved to database for user $hid");
+  } catch (e) {
+    print("Error saving token to database: $e");
+  }
 }
 
-Future<void> setupFCM() async {
+Future<void> getDeviceToken({String? hid}) async {
+  String? token = await FirebaseMessaging.instance.getToken();
+  print("FCM Token: $token");
+
+  // Only save token if hid is provided
+  if (token != null && hid != null && hid.isNotEmpty) {
+    await saveTokenToDatabase(token, hid);
+  }
+}
+
+// Updated FCM setup to accept hid parameter
+Future<void> setupFCM({String? hid}) async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   // Request permissions for notifications
@@ -30,10 +50,18 @@ Future<void> setupFCM() async {
 
   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
     print('User granted permission');
-    await getDeviceToken(); // Fetch FCM token when permission is granted
+    await getDeviceToken(hid: hid); // Pass hid parameter to getDeviceToken
   } else {
     print('User denied permission');
   }
+
+  // Listen for token refresh events
+  FirebaseMessaging.instance.onTokenRefresh.listen((String token) {
+    print('FCM Token refreshed');
+    if (hid != null && hid.isNotEmpty) {
+      saveTokenToDatabase(token, hid);
+    }
+  });
 
   // Listen for foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -54,6 +82,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // We'll call setupFCM without hid parameter first
+  // and then call it again after user logs in
   await setupFCM();
   runApp(MyApp());
 }
@@ -63,12 +93,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(), // Set MyHomePage as the home screen
+      home: Login(), // Set Login as the home screen
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  final String hid; // Receive HID
+
+  MyHomePage({required this.hid}); // Constructor to accept HID
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -76,14 +110,49 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Index to keep track of the selected tab
   int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    setupFCM(hid: widget.hid);
+
+    // Listen for incoming messages while app is in foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received message: ${message.notification?.title}');
+      if (message.notification != null) {
+        _showMessageDialog(
+            message.notification!.title, message.notification!.body);
+      }
+    });
+  }
+
+  void _showMessageDialog(String? title, String? body) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title ?? "New Notification"),
+          content: Text(body ?? "No content"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   // List of screens to navigate to
-  final List<Widget> _screens = [
-    HomeScreen(),
-    DiseaseScreen(),
-    PollutionScreen(),
-    MentalHealthScreen(),
-  ];
+  List<Widget> get _screens => [
+        HomeScreen(hid: widget.hid), // Pass HID here
+        HealthRecordsWithAnalysis(hid: widget.hid),
+        DiseaseScreen(hid: widget.hid),
+        PollutionScreen(),
+        FeedScreen(hid: widget.hid),
+      ];
 
   // Method to change the screen based on selected index
   void _onItemTapped(int index) {
@@ -110,6 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
             topRight: Radius.circular(30.0), // Rounded top-right corner
           ),
           child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
             currentIndex: _selectedIndex,
             showSelectedLabels: true, // Show label for selected item
             showUnselectedLabels: true,
@@ -132,33 +202,43 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
-                  AssetImage('assets/icons/disease.png'),
+                  AssetImage('assets/icons/summary.png'),
                   size: _selectedIndex == 1 ? 30.0 : 24.0,
                   color: _selectedIndex == 1
                       ? Color(0xff403DB4)
                       : Color(0xff414141),
                 ),
-                label: 'Disease',
+                label: 'Summary',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
-                  AssetImage('assets/icons/pollution.png'),
+                  AssetImage('assets/icons/disease.png'),
                   size: _selectedIndex == 2 ? 30.0 : 24.0,
                   color: _selectedIndex == 2
                       ? Color(0xff403DB4)
                       : Color(0xff414141),
                 ),
-                label: 'Pollution',
+                label: 'Diagnosis',
               ),
               BottomNavigationBarItem(
                 icon: ImageIcon(
-                  AssetImage('assets/icons/mental.png'),
+                  AssetImage('assets/icons/news.png'),
                   size: _selectedIndex == 3 ? 30.0 : 24.0,
                   color: _selectedIndex == 3
                       ? Color(0xff403DB4)
                       : Color(0xff414141),
                 ),
-                label: 'Mental Health',
+                label: 'News n Report',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(
+                  AssetImage('assets/icons/personal.png'),
+                  size: _selectedIndex == 4 ? 30.0 : 24.0,
+                  color: _selectedIndex == 4
+                      ? Color(0xff403DB4)
+                      : Color(0xff414141),
+                ),
+                label: 'Explore',
               ),
             ],
           ),

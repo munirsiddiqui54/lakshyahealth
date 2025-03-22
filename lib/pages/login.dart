@@ -1,7 +1,18 @@
-import 'package:arogya/main.dart';
 import 'package:flutter/material.dart';
+import 'package:arogya/main.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
+  @override
+  _LoginState createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final TextEditingController _hidController =
+      TextEditingController(text: "9683036847");
+  final TextEditingController _phoneController =
+      TextEditingController(text: "932214213");
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,70 +21,80 @@ class Login extends StatelessWidget {
         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image:
-                AssetImage("assets/loginbg.png"), // Change to your image path
-            fit: BoxFit.cover, // Adjust to cover the full screen
+            image: AssetImage("assets/loginbg.png"),
+            fit: BoxFit.cover,
           ),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.grey.shade300,
-                child:
-                    Icon(Icons.person, size: 50, color: Colors.grey.shade600),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "LOGIN",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff2E0C58),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.grey.shade300,
+                  child:
+                      Icon(Icons.person, size: 50, color: Colors.grey.shade600),
                 ),
-              ),
-              SizedBox(height: 20),
-              buildTextField("Health Card ID", "7734 5556 7788", false),
-              buildTextField("User Name", "Enter your Username", false),
-              buildTextField("Password", "Enter your password", true),
-              SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity, // Makes the button take full width
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyHomePage()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff2E0C58),
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                SizedBox(height: 20),
+                Text(
+                  "LOGIN",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff2E0C58),
                   ),
                 ),
-              )
-            ],
+                SizedBox(height: 20),
+                buildTextField(
+                    "Health Card ID", "Enter your Hid", false, _hidController),
+                buildTextField("Phone Number", "Enter Phone number", false,
+                    _phoneController),
+                SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        String hid = _hidController.text;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(hid: hid),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff2E0C58),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget buildTextField(String label, String hintText, bool isPassword) {
+  Widget buildTextField(String label, String hintText, bool isPassword,
+      TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -87,8 +108,15 @@ class Login extends StatelessWidget {
             ),
           ),
           SizedBox(height: 5),
-          TextField(
+          TextFormField(
+            controller: controller,
             obscureText: isPassword,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "$label cannot be empty";
+              }
+              return null;
+            },
             decoration: InputDecoration(
               hintText: hintText,
               filled: true,

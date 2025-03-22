@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:arogya/utils/api.dart';
 
 class HospitalsScreen extends StatefulWidget {
+  final String hid;
+
+  HospitalsScreen({required this.hid});
+
   @override
   _HospitalsScreenState createState() => _HospitalsScreenState();
 }
@@ -19,7 +23,8 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
 
   Future<void> _loadHospitals() async {
     try {
-      List<dynamic> hospitals = await fetchHospitals("Nerul, Navi Mumbai");
+      List<dynamic> hospitals =
+          await fetchHospitals("Nerul, Navi Mumbai", widget.hid);
       print("HOSPITALS $hospitals");
       setState(() {
         _hospitals = hospitals.take(6).toList(); // Limit to 6 hospitals

@@ -1,4 +1,5 @@
-import 'package:arogya/tabs/news_screen.dart';
+import 'package:arogya/pages/disease_screen.dart';
+import 'package:arogya/tabs/diseasenews.dart';
 import 'package:arogya/tabs/report_screen.dart';
 import 'package:arogya/tabs/reportretrive.dart';
 import 'package:flutter/material.dart';
@@ -36,11 +37,11 @@ class _PollutionScreenState extends State<PollutionScreen>
           tabs: [
             Tab(
               text: "Report",
-              icon: Icon(Icons.report, color: Colors.white),
+              // icon: Icon(Icons.report, color: Colors.white),
             ),
             Tab(
               text: "News",
-              icon: Icon(Icons.newspaper, color: Colors.white),
+              // icon: Icon(Icons.newspaper, color: Colors.white),
             ),
           ],
           indicatorColor: Colors.white,
@@ -50,7 +51,7 @@ class _PollutionScreenState extends State<PollutionScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [ReportScreen(), NewsScreen()],
+        children: [ReportScreen(), DisNewsScreen()],
       ),
     );
   }
